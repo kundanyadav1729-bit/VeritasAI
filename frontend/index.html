@@ -185,7 +185,7 @@
         resultBox.classList.add('hidden');
 
         try {
-            const response = await fetch('http://localhost:8000/api/verify', {
+            const response = await fetch('https://veritasai-s8vj.onrender.com/api/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: claim })
