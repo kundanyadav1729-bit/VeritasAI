@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeritasAI - Enterprise Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* High-Performance Animations that won't lag an i3 */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob { animation: blob 7s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+        
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+    .gradient-text {
+    background: linear-gradient(to right, #34d399, #0ea5e9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+        
+        .glow-input:focus {
+            box-shadow: 0 0 20px rgba(52, 211, 153, 0.2);
+            border-color: #34d399;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen overflow-x-hidden font-sans selection:bg-emerald-500 selection:text-white">
+
+    <div class="fixed w-full h-full z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 -left-4 w-96 h-96 bg-fuchsia-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob"></div>
+<div class="absolute top-0 -right-4 w-96 h-96 bg-amber-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-2000"></div>
+<div class="absolute -bottom-8 left-20 w-96 h-96 bg-cyan-400 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <nav class="relative z-10 border-b border-white/5 bg-slate-900/50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-shield-halved text-emerald-400 text-2xl"></i>
+                <h1 class="text-2xl font-black tracking-wider">VERITAS<span class="text-emerald-400">AI</span></h1>
+            </div>
+            <div class="flex gap-4">
+                <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-bold uppercase tracking-wide flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> System Online
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 max-w-5xl mx-auto px-6 py-12">
+        <div class="text-center mb-12">
+            <h2 class="text-5xl font-extrabold mb-4">Neural Threat & <span class="gradient-text">Misinformation Detection</span></h2>
+            <p class="text-slate-400 text-lg max-w-2xl mx-auto">Analyze raw text claims, URLs, or upload screenshots of suspicious WhatsApp forwards for live RAG verification.</p>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-2 md:p-8">
+            
+            <div class="flex gap-2 mb-6 bg-slate-900/50 p-1 rounded-lg w-fit mx-auto border border-slate-700">
+                <button onclick="switchTab('text')" id="tab-text" class="px-6 py-2 rounded-md bg-emerald-500 text-white font-bold transition-all"><i class="fa-solid fa-align-left mr-2"></i>Text Claim</button>
+                <button onclick="switchTab('image')" id="tab-image" class="px-6 py-2 rounded-md text-slate-400 hover:text-white transition-all"><i class="fa-solid fa-image mr-2"></i>Image / OCR</button>
+            </div>
+
+            <div id="input-text" class="block">
+                <textarea id="claimInput" class="w-full h-40 p-5 rounded-xl bg-slate-900/80 border border-slate-700 text-white placeholder-slate-500 glow-input outline-none transition-all resize-none text-lg" placeholder="Enter a suspicious headline, political claim, or rumor here..."></textarea>
+            </div>
+
+            <div id="input-image" class="hidden">
+    <input type="file" id="fileUpload" class="hidden" accept="image/png, image/jpeg, image/jpg" onchange="handleFileSelect(event)">
+    
+    <div onclick="document.getElementById('fileUpload').click()" class="border-2 border-dashed border-slate-600 rounded-xl p-12 text-center hover:border-emerald-400 transition-colors bg-slate-900/50 cursor-pointer group">
+        <i id="uploadIcon" class="fa-solid fa-cloud-arrow-up text-5xl text-slate-500 group-hover:text-emerald-400 transition-colors mb-4"></i>
+        <h3 id="uploadTitle" class="text-xl font-bold mb-2">Drag & Drop Screenshot or Click</h3>
+        <p id="uploadSubtitle" class="text-slate-400 text-sm">Supports PNG, JPG, JPEG up to 5MB.</p>
+        <button type="button" class="mt-4 px-4 py-2 bg-slate-800 text-white rounded-lg border border-slate-600 group-hover:border-emerald-500 transition-all pointer-events-none">Browse Files</button>
+    </div>
+</div>
+            
+            <button id="verifyBtn" class="w-full mt-6 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 py-4 rounded-xl font-bold text-xl shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all flex justify-center items-center gap-3 transform hover:-translate-y-1" onclick="analyzeClaim()">
+                <i class="fa-solid fa-microchip"></i>
+                <span>Initialize Analysis</span>
+                <svg id="loadingSpinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            </button>
+        </div>
+
+        <div id="resultBox" class="hidden mt-8 transform transition-all duration-500 translate-y-0 opacity-100">
+            <div class="glass-panel rounded-2xl p-8 border-l-4" id="resultCard">
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <p class="text-slate-400 text-sm font-bold uppercase tracking-wider mb-1">Final Verdict</p>
+                        <h2 class="text-4xl font-black tracking-wide" id="verdictText"></h2>
+                    </div>
+                    
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 w-full md:w-64">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-slate-400 text-xs font-bold uppercase">Confidence Score</span>
+                            <span id="confidenceText" class="text-emerald-400 font-bold"></span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-2.5">
+                            <div id="confidenceBar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <p class="text-slate-400 text-sm font-bold uppercase tracking-wider mb-2"><i class="fa-solid fa-network-wired mr-2"></i>AI Reasoning</p>
+                    <p id="explanationText" class="text-slate-200 leading-relaxed text-lg bg-slate-900/50 p-6 rounded-xl border border-slate-700/50"></p>
+                </div>
+                
+                <div>
+                    <p class="text-slate-400 text-sm font-bold uppercase tracking-wider mb-3"><i class="fa-solid fa-link mr-2"></i>Verified Sources Searched</p>
+                    <ul id="sourcesList" class="space-y-3 grid grid-cols-1 md:grid-cols-2 gap-4"></ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    // Tab Switcher Logic
+    let currentMode = 'text';
+    function switchTab(mode) {
+        currentMode = mode;
+        const textTab = document.getElementById('tab-text');
+        const imageTab = document.getElementById('tab-image');
+        const textInput = document.getElementById('input-text');
+        const imageInput = document.getElementById('input-image');
+
+        if (mode === 'text') {
+            textTab.className = 'px-6 py-2 rounded-md bg-emerald-500 text-white font-bold transition-all';
+            imageTab.className = 'px-6 py-2 rounded-md text-slate-400 hover:text-white transition-all';
+            textInput.classList.remove('hidden');
+            imageInput.classList.add('hidden');
+        } else {
+            imageTab.className = 'px-6 py-2 rounded-md bg-emerald-500 text-white font-bold transition-all';
+            textTab.className = 'px-6 py-2 rounded-md text-slate-400 hover:text-white transition-all';
+            imageInput.classList.remove('hidden');
+            textInput.classList.add('hidden');
+        }
+    }
+
+    // Image Upload Logic
+    let selectedImage = null;
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            selectedImage = file;
+            document.getElementById('uploadTitle').innerText = file.name;
+            document.getElementById('uploadTitle').classList.add('text-emerald-400');
+            document.getElementById('uploadSubtitle').innerText = "Image successfully loaded and ready for analysis.";
+            document.getElementById('uploadIcon').className = "fa-solid fa-file-circle-check text-5xl text-emerald-500 mb-4";
+        }
+    }
+
+    // AI Analysis Logic
+    async function analyzeClaim() {
+        if (currentMode === 'image') {
+            alert("The UI for images is ready! We will build the Python backend to read screenshots in the next step.");
+            return;
+        }
+
+        const btn = document.getElementById('verifyBtn');
+        const spinner = document.getElementById('loadingSpinner');
+        const btnText = btn.querySelector('span');
+        const resultBox = document.getElementById('resultBox');
+        const claim = document.getElementById('claimInput').value;
+        
+        if (!claim) return alert("Please enter a claim first!");
+
+        btnText.innerText = "Running Neural Analysis...";
+        spinner.classList.remove('hidden');
+        resultBox.classList.add('hidden');
+
+        try {
+            const response = await fetch('http://localhost:8000/api/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: claim })
+            });
+            
+            const data = await response.json();
+            
+            const verdictEl = document.getElementById('verdictText');
+            const resultCard = document.getElementById('resultCard');
+            const confBar = document.getElementById('confidenceBar');
+            
+            verdictEl.innerText = data.verdict.toUpperCase();
+            
+            if (data.verdict.toLowerCase().includes('fake')) {
+                verdictEl.className = 'text-4xl font-black tracking-wide text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.6)]';
+                resultCard.style.borderLeftColor = '#ef4444';
+                confBar.className = 'bg-red-500 h-2.5 rounded-full transition-all duration-1000';
+            } else if (data.verdict.toLowerCase().includes('true')) {
+                verdictEl.className = 'text-4xl font-black tracking-wide text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.6)]';
+                resultCard.style.borderLeftColor = '#34d399';
+                confBar.className = 'bg-emerald-500 h-2.5 rounded-full transition-all duration-1000';
+            } else {
+                verdictEl.className = 'text-4xl font-black tracking-wide text-amber-400 drop-shadow-[0_0_15px_rgba(251,191,36,0.6)]';
+                resultCard.style.borderLeftColor = '#fbbf24';
+                confBar.className = 'bg-amber-400 h-2.5 rounded-full transition-all duration-1000';
+            }
+
+            document.getElementById('confidenceText').innerText = `${data.confidence}%`;
+            setTimeout(() => { confBar.style.width = `${data.confidence}%`; }, 100);
+            
+            document.getElementById('explanationText').innerText = data.explanation;
+            
+            const sourcesList = document.getElementById('sourcesList');
+            sourcesList.innerHTML = '';
+            data.sources.forEach(url => {
+                sourcesList.innerHTML += `
+                <li class="flex items-center gap-3 bg-slate-900/80 p-3 rounded-lg border border-slate-700 hover:border-emerald-500/50 transition-colors">
+                    <i class="fa-solid fa-globe text-emerald-500"></i>
+                    <a href="${url}" target="_blank" class="text-slate-300 hover:text-white truncate text-sm font-medium">${url}</a>
+                </li>`;
+            });
+
+            resultBox.classList.remove('hidden');
+        } catch (error) {
+            alert("Backend offline. Start the Uvicorn server in the terminal.");
+        }
+        
+        btnText.innerText = "Initialize Analysis";
+        spinner.classList.add('hidden');
+    }
+</script>
+</body>
+</html>
