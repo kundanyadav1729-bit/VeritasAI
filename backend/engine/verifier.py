@@ -16,16 +16,17 @@ class Verifier:
             "reuters.com", "apnews.com", "bbc.com", "npr.org", "aljazeera.com",
             # Dedicated Fact Checkers
             "politifact.com", "snopes.com", "factcheck.org", "leadstories.com",
-            # Indian & Regional Fact Checkers
-            "thehindu.com", "altnews.in", "boomlive.in", "pib.gov.in", "smhoaxdetective.com", "vishvasnews.com"
+            # Indian Fact Checkers & Mainstream News (ADDED BREAKING NEWS SITES)
+            "thehindu.com", "altnews.in", "boomlive.in", "pib.gov.in", "smhoaxdetective.com", "vishvasnews.com",
+            "ndtv.com", "indiatoday.in", "indianexpress.com", "hindustantimes.com", "timesofindia.indiatimes.com", "news18.com"
         ]
 
     def fetch_evidence(self, query):
         evidence = []
-        # CHANGED: We removed the " fact check" keyword so it can find breaking news too!
+        # CHANGED: increased num_results to 10 to ensure we catch whitelisted sites
         search_query = query 
         
-        for url in search(search_query, num_results=5):
+        for url in search(search_query, num_results=10):
             if any(source in url for source in self.trusted_sources):
                 try:
                     response = requests.get(url, timeout=5)
