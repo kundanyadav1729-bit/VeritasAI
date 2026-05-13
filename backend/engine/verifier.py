@@ -1,7 +1,7 @@
 import os
 import requests
 from bs4 import BeautifulSoup
-from googlesearch import search
+from duckduckgo_search import DDGS
 from groq import Groq
 from dotenv import load_dotenv
 import json
@@ -16,33 +16,39 @@ class Verifier:
             "reuters.com", "apnews.com", "bbc.com", "npr.org", "aljazeera.com",
             # Dedicated Fact Checkers
             "politifact.com", "snopes.com", "factcheck.org", "leadstories.com",
-            # Indian Fact Checkers & Mainstream News (ADDED BREAKING NEWS SITES)
+            # Indian Fact Checkers & Mainstream News
             "thehindu.com", "altnews.in", "boomlive.in", "pib.gov.in", "smhoaxdetective.com", "vishvasnews.com",
             "ndtv.com", "indiatoday.in", "indianexpress.com", "hindustantimes.com", "timesofindia.indiatimes.com", "news18.com"
         ]
 
     def fetch_evidence(self, query):
         evidence = []
-        # CHANGED: increased num_results to 10 to ensure we catch whitelisted sites
-        search_query = query 
-        
-        for url in search(search_query, num_results=10):
-            if any(source in url for source in self.trusted_sources):
-                try:
-                    response = requests.get(url, timeout=5)
-                    soup = BeautifulSoup(response.text, 'html.parser')
-                    paragraphs = soup.find_all('p')
-                    text = ' '.join([p.text for p in paragraphs[:3]]) 
-                    evidence.append({"url": url, "text": text})
-                except Exception:
-                    continue
+        try:
+            with DDGS() as ddgs:
+                # DuckDuckGo search won't block Render servers
+                results = list(ddgs.text(query, max_results=10))
+                
+                for r in results:
+                    url = r.get('href', '')
+                    if any(source in url for source in self.trusted_sources):
+                        try:
+                            # Added User-Agent so news sites think we are a real browser
+                            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+                            response = requests.get(url, headers=headers, timeout=5)
+                            soup = BeautifulSoup(response.text, 'html.parser')
+                            paragraphs = soup.find_all('p')
+                            text = ' '.join([p.text for p in paragraphs[:3]]) 
+                            evidence.append({"url": url, "text": text})
+                        except Exception:
+                            continue
+        except Exception as e:
+            print(f"Search failed: {e}")
+            
         return evidence
 
-    # CHANGED: Removed 'async' and renamed to 'verify_claim' to match your main.py perfectly!
     def verify_claim(self, claim):
         evidence_data = self.fetch_evidence(claim)
         
-        # CHANGED: The Hybrid System Prompt to fix the Fact-Checker Paradox
         system_prompt = f"""
         You are VeritasAI, an expert, razor-sharp fact-checker. 
         Analyze this claim: "{claim}"
