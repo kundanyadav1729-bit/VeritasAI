@@ -22,7 +22,8 @@ class Verifier:
 
     def fetch_evidence(self, query):
         evidence = []
-        search_query = f"{query} fact check"
+        # CHANGED: We removed the " fact check" keyword so it can find breaking news too!
+        search_query = query 
         
         for url in search(search_query, num_results=5):
             if any(source in url for source in self.trusted_sources):
