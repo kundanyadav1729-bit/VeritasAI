@@ -12,13 +12,13 @@ class Verifier:
     def __init__(self):
         self.groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
         self.trusted_sources = [
-    # Global Heavyweights
-    "reuters.com", "apnews.com", "bbc.com", "npr.org", "aljazeera.com",
-    # Dedicated Fact Checkers
-    "politifact.com", "snopes.com", "factcheck.org", "leadstories.com",
-    # Indian & Regional Fact Checkers
-    "thehindu.com", "altnews.in", "boomlive.in", "pib.gov.in", "smhoaxdetective.com", "vishvasnews.com"
-]
+            # Global Heavyweights
+            "reuters.com", "apnews.com", "bbc.com", "npr.org", "aljazeera.com",
+            # Dedicated Fact Checkers
+            "politifact.com", "snopes.com", "factcheck.org", "leadstories.com",
+            # Indian & Regional Fact Checkers
+            "thehindu.com", "altnews.in", "boomlive.in", "pib.gov.in", "smhoaxdetective.com", "vishvasnews.com"
+        ]
 
     def fetch_evidence(self, query):
         evidence = []
@@ -36,19 +36,25 @@ class Verifier:
                     continue
         return evidence
 
-    async def analyze(self, claim):
+    # CHANGED: Removed 'async' and renamed to 'verify_claim' to match your main.py perfectly!
+    def verify_claim(self, claim):
         evidence_data = self.fetch_evidence(claim)
         
-        prompt = f"""
+        # CHANGED: The Hybrid System Prompt to fix the Fact-Checker Paradox
+        system_prompt = f"""
+        You are VeritasAI, an expert, razor-sharp fact-checker. 
         Analyze this claim: "{claim}"
-        Here is evidence from trusted sources: {evidence_data}
-        Determine if the claim is Real, Fake, or Misleading. 
-        Provide a confidence score (0-100) and a 2-sentence explanation.
-        Format the output strictly as JSON with keys: verdict, confidence, explanation.
+        Here is the evidence scraped from trusted websites: {evidence_data}
+
+        Follow these strict rules:
+        1. If the scraped evidence contains relevant information, use it to prove or debunk the claim.
+        2. If the scraped evidence is EMPTY, but the claim involves well-established public facts (like political leaders, history, or science), you MUST use your internal knowledge to explicitly correct the user.
+        3. NEVER be vague. If a claim is wrong, state the actual truth immediately.
+        4. Format the output strictly as JSON with keys: 'verdict' (Real, Fake, or Unclear), 'confidence' (0-100), and 'explanation' (2-3 direct sentences). Do not say "The provided evidence is empty." Just state the facts.
         """
 
         chat_completion = self.groq_client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
+            messages=[{"role": "system", "content": system_prompt}],
             model="llama-3.1-8b-instant", 
             response_format={"type": "json_object"}
         )
